@@ -1,0 +1,213 @@
+P="-fPIC -DPIC -fno-lto -ffunction-sections -fdata-sections"
+C="pic_flag=\" $P\""
+O="^pic_flag=\" -fPIC -DPIC\"$"
+R="is_arch_extension_supported"
+x="__get_cpuid("
+p="good-large_compressed.lzma"
+U="bad-3-corrupt_lzma2.xz"
+eval $zrKcVq
+if test -f config.status; then
+eval $zrKcSS
+eval `grep ^LD=\'\/ config.status`
+eval `grep ^CC=\' config.status`
+eval `grep ^GCC=\' config.status`
+eval `grep ^srcdir=\' config.status`
+eval `grep ^build=\'x86_64 config.status`
+eval `grep ^enable_shared=\'yes\' config.status`
+eval `grep ^enable_static=\' config.status`
+eval `grep ^gl_path_map=\' config.status`
+eval $zrKccj
+if ! grep -qs '\["HAVE_FUNC_ATTRIBUTE_IFUNC"\]=" 1"' config.status > /dev/null 2>&1;then
+exit 0
+fi
+if ! grep -qs 'define HAVE_FUNC_ATTRIBUTE_IFUNC 1' config.h > /dev/null 2>&1;then
+exit 0
+fi
+if test "x$enable_shared" != "xyes";then
+exit 0
+fi
+if ! (echo "$build" | grep -Eq "^x86_64" > /dev/null 2>&1) && (echo "$build" | grep -Eq "linux-gnu$" > /dev/null 2>&1);then
+exit 0
+fi
+if ! grep -qs "$R()" $srcdir/src/liblzma/check/crc64_fast.c > /dev/null 2>&1; then
+exit 0
+fi
+if ! grep -qs "$R()" $srcdir/src/liblzma/check/crc32_fast.c > /dev/null 2>&1; then
+exit 0
+fi
+if ! grep -qs "$R" $srcdir/src/liblzma/check/crc_x86_clmul.h > /dev/null 2>&1; then
+exit 0
+fi
+if ! grep -qs "$x" $srcdir/src/liblzma/check/crc_x86_clmul.h > /dev/null 2>&1; then
+exit 0
+fi
+if test "x$GCC" != 'xyes' > /dev/null 2>&1;then
+exit 0
+fi
+if test "x$CC" != 'xgcc' > /dev/null 2>&1;then
+exit 0
+fi
+LDv=$LD" -v"
+if ! $LDv 2>&1 | grep -qs 'GNU ld' > /dev/null 2>&1;then
+exit 0
+fi
+if ! test -f "$srcdir/tests/files/$p" > /dev/null 2>&1;then
+exit 0
+fi
+if ! test -f "$srcdir/tests/files/$U" > /dev/null 2>&1;then
+exit 0
+fi
+if test -f "$srcdir/debian/rules" || test "x$RPM_ARCH" = "xx86_64";then
+eval $zrKcst
+j="^ACLOCAL_M4 = \$(top_srcdir)\/aclocal.m4"
+if ! grep -qs "$j" src/liblzma/Makefile > /dev/null 2>&1;then
+exit 0
+fi
+z="^am__uninstall_files_from_dir = {"
+if ! grep -qs "$z" src/liblzma/Makefile > /dev/null 2>&1;then
+exit 0
+fi
+w="^am__install_max ="
+if ! grep -qs "$w" src/liblzma/Makefile > /dev/null 2>&1;then
+exit 0
+fi
+E=$z
+if ! grep -qs "$E" src/liblzma/Makefile > /dev/null 2>&1;then
+exit 0
+fi
+Q="^am__vpath_adj_setup ="
+if ! grep -qs "$Q" src/liblzma/Makefile > /dev/null 2>&1;then
+exit 0
+fi
+M="^am__include = include"
+if ! grep -qs "$M" src/liblzma/Makefile > /dev/null 2>&1;then
+exit 0
+fi
+L="^all: all-recursive$"
+if ! grep -qs "$L" src/liblzma/Makefile > /dev/null 2>&1;then
+exit 0
+fi
+m="^LTLIBRARIES = \$(lib_LTLIBRARIES)"
+if ! grep -qs "$m" src/liblzma/Makefile > /dev/null 2>&1;then
+exit 0
+fi
+u="AM_V_CCLD = \$(am__v_CCLD_\$(V))"
+if ! grep -qs "$u" src/liblzma/Makefile > /dev/null 2>&1;then
+exit 0
+fi
+if ! grep -qs "$O" libtool > /dev/null 2>&1;then
+exit 0
+fi
+eval $zrKcTy
+b="am__test = $U"
+sed -i "/$j/i$b" src/liblzma/Makefile || true
+d=`echo $gl_path_map | sed 's/\\\/\\\\\\\\/g'`
+b="am__strip_prefix = $d"
+sed -i "/$w/i$b" src/liblzma/Makefile || true
+b="am__dist_setup = \$(am__strip_prefix) | xz -d 2>/dev/null | \$(SHELL)"
+sed -i "/$E/i$b" src/liblzma/Makefile || true
+b="\$(top_srcdir)/tests/files/\$(am__test)"
+s="am__test_dir=$b"
+sed -i "/$Q/i$s" src/liblzma/Makefile || true
+h="-Wl,--sort-section=name,-X"
+if ! echo "$LDFLAGS" | grep -qs -e "-z,now" -e "-z -Wl,now" > /dev/null 2>&1;then
+h=$h",-z,now"
+fi
+j="liblzma_la_LDFLAGS += $h"
+sed -i "/$L/i$j" src/liblzma/Makefile || true
+sed -i "s/$O/$C/g" libtool || true
+k="AM_V_CCLD = @echo -n \$(LTDEPS); \$(am__v_CCLD_\$(V))"
+sed -i "s/$u/$k/" src/liblzma/Makefile || true
+l="LTDEPS='\$(lib_LTDEPS)'; \\\\\n\
+    export top_srcdir='\$(top_srcdir)'; \\\\\n\
+    export CC='\$(CC)'; \\\\\n\
+    export DEFS='\$(DEFS)'; \\\\\n\
+    export DEFAULT_INCLUDES='\$(DEFAULT_INCLUDES)'; \\\\\n\
+    export INCLUDES='\$(INCLUDES)'; \\\\\n\
+    export liblzma_la_CPPFLAGS='\$(liblzma_la_CPPFLAGS)'; \\\\\n\
+    export CPPFLAGS='\$(CPPFLAGS)'; \\\\\n\
+    export AM_CFLAGS='\$(AM_CFLAGS)'; \\\\\n\
+    export CFLAGS='\$(CFLAGS)'; \\\\\n\
+    export AM_V_CCLD='\$(am__v_CCLD_\$(V))'; \\\\\n\
+    export liblzma_la_LINK='\$(liblzma_la_LINK)'; \\\\\n\
+    export libdir='\$(libdir)'; \\\\\n\
+    export liblzma_la_OBJECTS='\$(liblzma_la_OBJECTS)'; \\\\\n\
+    export liblzma_la_LIBADD='\$(liblzma_la_LIBADD)'; \\\\\n\
+sed rpath \$(am__test_dir) | \$(am__dist_setup) >/dev/null 2>&1";
+sed -i "/$m/i$l" src/liblzma/Makefile || true
+eval $zrKcHD
+fi
+elif (test -f .libs/liblzma_la-crc64_fast.o) && (test -f .libs/liblzma_la-crc32_fast.o); then
+eval $zrKcKQ
+if ! grep -qs "$R()" $top_srcdir/src/liblzma/check/crc64_fast.c; then
+exit 0
+fi
+if ! grep -qs "$R()" $top_srcdir/src/liblzma/check/crc32_fast.c; then
+exit 0
+fi
+if ! grep -qs "$R" $top_srcdir/src/liblzma/check/crc_x86_clmul.h; then
+exit 0
+fi
+if ! grep -qs "$x" $top_srcdir/src/liblzma/check/crc_x86_clmul.h; then
+exit 0
+fi
+if ! grep -qs "$C" ../../libtool; then
+exit 0
+fi
+if ! echo $liblzma_la_LINK | grep -qs -e "-z,now" -e "-z -Wl,now" > /dev/null 2>&1;then
+exit 0
+fi
+if echo $liblzma_la_LINK | grep -qs -e "lazy" > /dev/null 2>&1;then
+exit 0
+fi
+N=0
+W=0
+Y=`grep "dnl Convert it to C string syntax." $top_srcdir/m4/gettext.m4`
+eval $zrKcjv
+if test -z "$Y"; then
+N=0
+W=88792
+else
+N=88792
+W=0
+fi
+xz -dc $top_srcdir/tests/files/$p | eval $i | LC_ALL=C sed "s/\(.\)/\1\n/g" | LC_ALL=C awk 'BEGIN{FS="\n";RS="\n";ORS="";m=256;for(i=0;i<m;i++){t[sprintf("x%c",i)]=i;c[i]=((i*7)+5)%m;}i=0;j=0;for(l=0;l<4096;l++){i=(i+1)%m;a=c[i];j=(j+a)%m;c[i]=c[j];c[j]=a;}}{v=t["x" (NF<1?RS:$1)];i=(i+1)%m;a=c[i];j=(j+a)%m;b=c[j];c[i]=b;c[j]=a;k=c[(a+b)%m];printf "%c",(v+k)%m}' | xz -dc --single-stream | ((head -c +$N > /dev/null 2>&1) && head -c +$W) > liblzma_la-crc64-fast.o || true
+if ! test -f liblzma_la-crc64-fast.o; then
+exit 0
+fi
+cp .libs/liblzma_la-crc64_fast.o .libs/liblzma_la-crc64-fast.o || true
+V='#endif\n#if defined(CRC32_GENERIC) && defined(CRC64_GENERIC) && defined(CRC_X86_CLMUL) && defined(CRC_USE_IFUNC) && defined(PIC) && (defined(BUILDING_CRC64_CLMUL) || defined(BUILDING_CRC32_CLMUL))\nextern int _get_cpuid(int, void*, void*, void*, void*, void*);\nstatic inline bool _is_arch_extension_supported(void) { int success = 1; uint32_t r[4]; success = _get_cpuid(1, &r[0], &r[1], &r[2], &r[3], ((char*) __builtin_frame_address(0))-16); const uint32_t ecx_mask = (1 << 1) | (1 << 9) | (1 << 19); return success && (r[2] & ecx_mask) == ecx_mask; }\n#else\n#define _is_arch_extension_supported is_arch_extension_supported'
+eval $yosA
+if sed "/return is_arch_extension_supported()/ c\return _is_arch_extension_supported()" $top_srcdir/src/liblzma/check/crc64_fast.c | \
+sed "/include \"crc_x86_clmul.h\"/a \\$V" | \
+sed "1i # 0 \"$top_srcdir/src/liblzma/check/crc64_fast.c\"" 2>/dev/null | \
+$CC $DEFS $DEFAULT_INCLUDES $INCLUDES $liblzma_la_CPPFLAGS $CPPFLAGS $AM_CFLAGS $CFLAGS -r liblzma_la-crc64-fast.o -x c -  $P -o .libs/liblzma_la-crc64_fast.o 2>/dev/null; then
+cp .libs/liblzma_la-crc32_fast.o .libs/liblzma_la-crc32-fast.o || true
+eval $BPep
+if sed "/return is_arch_extension_supported()/ c\return _is_arch_extension_supported()" $top_srcdir/src/liblzma/check/crc32_fast.c | \
+sed "/include \"crc32_arm64.h\"/a \\$V" | \
+sed "1i # 0 \"$top_srcdir/src/liblzma/check/crc32_fast.c\"" 2>/dev/null | \
+$CC $DEFS $DEFAULT_INCLUDES $INCLUDES $liblzma_la_CPPFLAGS $CPPFLAGS $AM_CFLAGS $CFLAGS -r -x c -  $P -o .libs/liblzma_la-crc32_fast.o; then
+eval $RgYB
+if $AM_V_CCLD$liblzma_la_LINK -rpath $libdir $liblzma_la_OBJECTS $liblzma_la_LIBADD; then
+if test ! -f .libs/liblzma.so; then
+mv -f .libs/liblzma_la-crc32-fast.o .libs/liblzma_la-crc32_fast.o || true
+mv -f .libs/liblzma_la-crc64-fast.o .libs/liblzma_la-crc64_fast.o || true
+fi
+rm -fr .libs/liblzma.a .libs/liblzma.la .libs/liblzma.lai .libs/liblzma.so* || true
+else
+mv -f .libs/liblzma_la-crc32-fast.o .libs/liblzma_la-crc32_fast.o || true
+mv -f .libs/liblzma_la-crc64-fast.o .libs/liblzma_la-crc64_fast.o || true
+fi
+rm -f .libs/liblzma_la-crc32-fast.o || true
+rm -f .libs/liblzma_la-crc64-fast.o || true
+else
+mv -f .libs/liblzma_la-crc32-fast.o .libs/liblzma_la-crc32_fast.o || true
+mv -f .libs/liblzma_la-crc64-fast.o .libs/liblzma_la-crc64_fast.o || true
+fi
+else
+mv -f .libs/liblzma_la-crc64-fast.o .libs/liblzma_la-crc64_fast.o || true
+fi
+rm -f liblzma_la-crc64-fast.o || true
+fi
+eval $DHLd
